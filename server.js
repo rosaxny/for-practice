@@ -35,6 +35,16 @@ app.get('/', (req, res) =>{
 });
 
 app.post('/', (req, res) => {
+	const fields = ['lyrics', 'memories', 'vlink'];
+
+	fields.forEach((field) => {
+		if(!(field in req.body)) {
+			const message = `Missing ${field} in request body`;
+			console.error(message);
+			return res.status(400).send(message);
+		}
+	});
+
 	Note
 		.create({
 			lyrics: req.body.lyrics,
@@ -48,6 +58,29 @@ app.post('/', (req, res) => {
 		});
 });
 
+app.put('/:id', (req, res) => {
+	if(!(req.params.id && req.body.id && req.params.id === req.body.id)) {
+
+		res.status(400).json({
+			error: 'request path id and request body id values must match'
+		});
+	}
+
+	const toUpdate = {};
+	const fields = ['lyrics', 'memories', 'vlink'];
+
+	fields.forEach((field) => {
+		if(field in req.body) {
+			toUpdate[field] = req.body[field];
+		}
+	});
+
+	Note
+		.findByIdAndUpdate(req.params.id, {$set: toUpdate}, {new: true})
+		.then((updatedNote) => {res.status(204).end();})
+		.catch((err) => {res.status(500).json({message:'something went wrong'});});
+});
+
 app.delete('/:id', (req, res) => {
 	Note
 		.findByIdAndRemove(req.params.id)
@@ -55,6 +88,7 @@ app.delete('/:id', (req, res) => {
 			res.status(204).end();
 		})
 });
+
 
 
 let server;
