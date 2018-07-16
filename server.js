@@ -48,6 +48,14 @@ app.post('/', (req, res) => {
 		});
 });
 
+app.delete('/:id', (req, res) => {
+	Note
+		.findByIdAndRemove(req.params.id)
+		.then(() => {
+			res.status(204).end();
+		})
+});
+
 
 let server;
 
